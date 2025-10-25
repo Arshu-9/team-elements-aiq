@@ -14,7 +14,433 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      connections: {
+        Row: {
+          connected_user_id: string
+          created_at: string
+          id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          connected_user_id: string
+          created_at?: string
+          id?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          connected_user_id?: string
+          created_at?: string
+          id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      conversation_participants: {
+        Row: {
+          conversation_id: string
+          id: string
+          joined_at: string
+          user_id: string
+        }
+        Insert: {
+          conversation_id: string
+          id?: string
+          joined_at?: string
+          user_id: string
+        }
+        Update: {
+          conversation_id?: string
+          id?: string
+          joined_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_participants_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      intrusion_attempts: {
+        Row: {
+          attempt_timestamp: string
+          attempted_by_user_id: string | null
+          device_info: Json | null
+          id: string
+          ip_address: string | null
+          reason: string
+          session_id: string
+        }
+        Insert: {
+          attempt_timestamp?: string
+          attempted_by_user_id?: string | null
+          device_info?: Json | null
+          id?: string
+          ip_address?: string | null
+          reason: string
+          session_id: string
+        }
+        Update: {
+          attempt_timestamp?: string
+          attempted_by_user_id?: string | null
+          device_info?: Json | null
+          id?: string
+          ip_address?: string | null
+          reason?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "intrusion_attempts_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          chat_mode: string | null
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          is_read: boolean | null
+          message_type: string | null
+          sender_id: string
+        }
+        Insert: {
+          chat_mode?: string | null
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          message_type?: string | null
+          sender_id: string
+        }
+        Update: {
+          chat_mode?: string | null
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          message_type?: string | null
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          status: string | null
+          updated_at: string
+          user_id: string
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          id: string
+          status?: string | null
+          updated_at?: string
+          user_id: string
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      session_chat_state: {
+        Row: {
+          chat_mode: string
+          id: string
+          session_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          chat_mode?: string
+          id?: string
+          session_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          chat_mode?: string
+          id?: string
+          session_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_chat_state_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: true
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      session_files: {
+        Row: {
+          created_at: string
+          encryption_key: string
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          id: string
+          is_opened: boolean | null
+          opened_at: string | null
+          opened_by: string | null
+          session_id: string
+          uploader_id: string
+        }
+        Insert: {
+          created_at?: string
+          encryption_key: string
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          id?: string
+          is_opened?: boolean | null
+          opened_at?: string | null
+          opened_by?: string | null
+          session_id: string
+          uploader_id: string
+        }
+        Update: {
+          created_at?: string
+          encryption_key?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          file_type?: string
+          id?: string
+          is_opened?: boolean | null
+          opened_at?: string | null
+          opened_by?: string | null
+          session_id?: string
+          uploader_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_files_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      session_key_rotations: {
+        Row: {
+          id: string
+          new_key: string
+          old_key: string
+          rotated_at: string
+          session_id: string
+        }
+        Insert: {
+          id?: string
+          new_key: string
+          old_key: string
+          rotated_at?: string
+          session_id: string
+        }
+        Update: {
+          id?: string
+          new_key?: string
+          old_key?: string
+          rotated_at?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_key_rotations_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      session_messages: {
+        Row: {
+          chat_mode: string | null
+          content: string
+          created_at: string
+          delivered_to: string[] | null
+          encrypted_content: string | null
+          id: string
+          is_deleted: boolean | null
+          read_by: string[] | null
+          sender_id: string
+          session_id: string
+        }
+        Insert: {
+          chat_mode?: string | null
+          content: string
+          created_at?: string
+          delivered_to?: string[] | null
+          encrypted_content?: string | null
+          id?: string
+          is_deleted?: boolean | null
+          read_by?: string[] | null
+          sender_id: string
+          session_id: string
+        }
+        Update: {
+          chat_mode?: string | null
+          content?: string
+          created_at?: string
+          delivered_to?: string[] | null
+          encrypted_content?: string | null
+          id?: string
+          is_deleted?: boolean | null
+          read_by?: string[] | null
+          sender_id?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      session_participants: {
+        Row: {
+          id: string
+          is_creator: boolean | null
+          joined_at: string
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          is_creator?: boolean | null
+          joined_at?: string
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          is_creator?: boolean | null
+          joined_at?: string
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_participants_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sessions: {
+        Row: {
+          authenticity: string
+          created_at: string
+          creator_id: string
+          duration_minutes: number
+          expires_at: string
+          id: string
+          is_active: boolean | null
+          name: string
+          security_level: string
+          session_key: string
+        }
+        Insert: {
+          authenticity?: string
+          created_at?: string
+          creator_id: string
+          duration_minutes: number
+          expires_at: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          security_level?: string
+          session_key: string
+        }
+        Update: {
+          authenticity?: string
+          created_at?: string
+          creator_id?: string
+          duration_minutes?: number
+          expires_at?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          security_level?: string
+          session_key?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
