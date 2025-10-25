@@ -66,20 +66,39 @@ const Requests = () => {
     if (!user) return;
 
     try {
-      const { data, error } = await (supabase as any)
+      const { data: requestsData, error } = await (supabase as any)
         .from("connections")
-        .select(`
-          *,
-          profile:profiles!user_id(display_name, avatar_url, user_id)
-        `)
+        .select("*")
         .eq("connected_user_id", user.id)
         .eq("status", "pending")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setRequests(data || []);
+
+      // Fetch sender profiles separately
+      if (requestsData && requestsData.length > 0) {
+        const senderIds = requestsData.map((r: any) => r.user_id);
+        const { data: profilesData } = await (supabase as any)
+          .from("profiles")
+          .select("id, display_name, avatar_url, user_id")
+          .in("id", senderIds);
+
+        // Combine the data
+        const formattedRequests = requestsData.map((request: any) => {
+          const profile = profilesData?.find((p: any) => p.id === request.user_id);
+          return {
+            ...request,
+            profile: profile || { display_name: "Unknown", avatar_url: "", user_id: "" }
+          };
+        });
+
+        setRequests(formattedRequests);
+      } else {
+        setRequests([]);
+      }
     } catch (error) {
       console.error("Error fetching requests:", error);
+      setRequests([]);
     } finally {
       setLoading(false);
     }

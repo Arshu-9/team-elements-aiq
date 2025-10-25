@@ -60,12 +60,22 @@ export const AddConnectionDialog = () => {
 
     setSending(true);
     try {
-      // Check if connection already exists
-      const { data: existing } = await (supabase as any)
+      // Check if connection already exists (both directions)
+      const { data: existingOut } = await (supabase as any)
         .from("connections")
         .select("id, status")
-        .or(`and(user_id.eq.${user.id},connected_user_id.eq.${searchResult.id}),and(user_id.eq.${searchResult.id},connected_user_id.eq.${user.id})`)
-        .single();
+        .eq("user_id", user.id)
+        .eq("connected_user_id", searchResult.id)
+        .maybeSingle();
+
+      const { data: existingIn } = await (supabase as any)
+        .from("connections")
+        .select("id, status")
+        .eq("user_id", searchResult.id)
+        .eq("connected_user_id", user.id)
+        .maybeSingle();
+
+      const existing = existingOut || existingIn;
 
       if (existing) {
         toast({
