@@ -1,9 +1,9 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import { Eye, Flame, MessageSquare } from "lucide-react";
+import { Bomb, MessageSquare } from "lucide-react";
 
 interface ChatModeSelectorProps {
-  mode: 'normal' | 'spy' | 'burn';
-  onModeChange: (mode: 'normal' | 'spy' | 'burn') => void;
+  mode: 'normal' | 'self-destruct';
+  onModeChange: (mode: 'normal' | 'self-destruct') => void;
 }
 
 export const ChatModeSelector = ({ mode, onModeChange }: ChatModeSelectorProps) => {
@@ -23,35 +23,21 @@ export const ChatModeSelector = ({ mode, onModeChange }: ChatModeSelectorProps) 
               </div>
             </div>
           </SelectItem>
-          <SelectItem value="spy">
+          <SelectItem value="self-destruct">
             <div className="flex items-center gap-2">
-              <Eye className="w-4 h-4 text-orange-500" />
+              <Bomb className="w-4 h-4 text-red-500" />
               <div className="text-left">
-                <div className="font-semibold">Spy Mode</div>
-                <div className="text-xs text-muted-foreground">No logs saved, temporary only</div>
-              </div>
-            </div>
-          </SelectItem>
-          <SelectItem value="burn">
-            <div className="flex items-center gap-2">
-              <Flame className="w-4 h-4 text-red-500" />
-              <div className="text-left">
-                <div className="font-semibold">Burn Mode</div>
-                <div className="text-xs text-muted-foreground">Auto-delete after read</div>
+                <div className="font-semibold">Self-Destruct Mode</div>
+                <div className="text-xs text-muted-foreground">Messages vanish 10s after being seen</div>
               </div>
             </div>
           </SelectItem>
         </SelectContent>
       </Select>
 
-      {mode === 'spy' && (
-        <p className="text-xs text-muted-foreground bg-orange-500/10 p-2 rounded border border-orange-500/30">
-          🕵️ Once seen, it's gone — not even the sender can recover it.
-        </p>
-      )}
-      {mode === 'burn' && (
+      {mode === 'self-destruct' && (
         <p className="text-xs text-muted-foreground bg-red-500/10 p-2 rounded border border-red-500/30">
-          🔥 Ultimate discretion — messages self-destruct after reading.
+          💣 Messages will self-destruct 10 seconds after being read by all participants
         </p>
       )}
     </div>

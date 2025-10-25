@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const useSyncedChatMode = (sessionId: string | undefined) => {
-  const [chatMode, setChatMode] = useState<'normal' | 'spy' | 'burn'>('normal');
+  const [chatMode, setChatMode] = useState<'normal' | 'self-destruct'>('normal');
 
   useEffect(() => {
     if (!sessionId) return;
@@ -40,7 +40,7 @@ export const useSyncedChatMode = (sessionId: string | undefined) => {
         },
         (payload) => {
           if (payload.new && 'chat_mode' in payload.new) {
-            setChatMode(payload.new.chat_mode as 'normal' | 'spy' | 'burn');
+            setChatMode(payload.new.chat_mode as 'normal' | 'self-destruct');
           }
         }
       )
@@ -51,7 +51,7 @@ export const useSyncedChatMode = (sessionId: string | undefined) => {
     };
   }, [sessionId]);
 
-  const updateChatMode = async (newMode: 'normal' | 'spy' | 'burn') => {
+  const updateChatMode = async (newMode: 'normal' | 'self-destruct') => {
     if (!sessionId) return;
 
     try {

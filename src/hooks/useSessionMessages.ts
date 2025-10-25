@@ -7,10 +7,11 @@ export interface SessionMessage {
   sender_id: string;
   content: string;
   encrypted_content?: string;
-  chat_mode: 'normal' | 'spy' | 'burn';
+  chat_mode: 'normal' | 'self-destruct';
   is_deleted: boolean;
   read_by?: string[];
   delivered_to?: string[];
+  auto_delete_at?: string;
   created_at: string;
   sender?: {
     display_name: string;
@@ -90,11 +91,15 @@ export const useSessionMessages = (sessionId: string | undefined) => {
           filter: `session_id=eq.${sessionId}`,
         },
         (payload) => {
-          setMessages((prev) =>
-            prev.map((msg) =>
-              msg.id === payload.new.id ? { ...msg, ...payload.new } : msg
-            )
-          );
+          if (payload.new.is_deleted) {
+            setMessages((prev) => prev.filter((msg) => msg.id !== payload.new.id));
+          } else {
+            setMessages((prev) =>
+              prev.map((msg) =>
+                msg.id === payload.new.id ? { ...msg, ...payload.new } : msg
+              )
+            );
+          }
         }
       )
       .subscribe();
@@ -104,7 +109,25 @@ export const useSessionMessages = (sessionId: string | undefined) => {
     };
   }, [sessionId]);
 
-  const sendMessage = async (content: string, chatMode: 'normal' | 'spy' | 'burn' = 'normal') => {
+  // Handle auto-deletion of self-destruct messages
+  useEffect(() => {
+    const checkForDeletion = () => {
+      messages.forEach((msg) => {
+        if (msg.auto_delete_at && new Date(msg.auto_delete_at) <= new Date() && !msg.is_deleted) {
+          // Mark message as deleted in database
+          supabase
+            .from("session_messages")
+            .update({ is_deleted: true })
+            .eq("id", msg.id);
+        }
+      });
+    };
+
+    const interval = setInterval(checkForDeletion, 1000);
+    return () => clearInterval(interval);
+  }, [messages]);
+
+  const sendMessage = async (content: string, chatMode: 'normal' | 'self-destruct' = 'normal') => {
     if (!sessionId) return;
 
     try {
@@ -136,9 +159,16 @@ export const useSessionMessages = (sessionId: string | undefined) => {
       const readBy = message.read_by || [];
       if (readBy.includes(user.id)) return;
 
+      const updates: any = { read_by: [...readBy, user.id] };
+      
+      // If self-destruct mode and this is the last unread user, set auto_delete_at
+      if (message.chat_mode === 'self-destruct') {
+        updates.auto_delete_at = new Date(Date.now() + 10000).toISOString();
+      }
+
       await (supabase as any)
         .from("session_messages")
-        .update({ read_by: [...readBy, user.id] })
+        .update(updates)
         .eq("id", messageId);
     } catch (error) {
       console.error("Error marking message as read:", error);

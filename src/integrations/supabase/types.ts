@@ -325,6 +325,7 @@ export type Database = {
       }
       session_messages: {
         Row: {
+          auto_delete_at: string | null
           chat_mode: string | null
           content: string
           created_at: string
@@ -337,6 +338,7 @@ export type Database = {
           session_id: string
         }
         Insert: {
+          auto_delete_at?: string | null
           chat_mode?: string | null
           content: string
           created_at?: string
@@ -349,6 +351,7 @@ export type Database = {
           session_id: string
         }
         Update: {
+          auto_delete_at?: string | null
           chat_mode?: string | null
           content?: string
           created_at?: string

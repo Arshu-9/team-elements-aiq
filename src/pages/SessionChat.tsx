@@ -37,6 +37,7 @@ const SessionChat = () => {
   const [copiedKey, setCopiedKey] = useState(false);
   const [intrusionAlerts, setIntrusionAlerts] = useState<any[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messageRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -45,6 +46,32 @@ const SessionChat = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Auto-mark messages as read when they come into view
+  useEffect(() => {
+    if (!user) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const messageId = entry.target.getAttribute('data-message-id');
+            const senderId = entry.target.getAttribute('data-sender-id');
+            if (messageId && senderId !== user.id) {
+              markAsRead(messageId);
+            }
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+
+    messageRefs.current.forEach((ref) => {
+      if (ref) observer.observe(ref);
+    });
+
+    return () => observer.disconnect();
+  }, [messages, user, markAsRead]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -356,6 +383,11 @@ const SessionChat = () => {
         {messages.map((msg) => (
           <div
             key={msg.id}
+            ref={(el) => {
+              if (el) messageRefs.current.set(msg.id, el);
+            }}
+            data-message-id={msg.id}
+            data-sender-id={msg.sender_id}
             className={`flex ${msg.sender_id === user?.id ? "justify-end" : "justify-start"} animate-fade-in`}
           >
             <div
@@ -371,21 +403,16 @@ const SessionChat = () => {
                 </p>
               )}
               <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-              {msg.chat_mode === 'burn' && (
+              {msg.chat_mode === 'self-destruct' && (
                 <p className="text-xs opacity-50 flex items-center gap-1">
-                  🔥 Auto-delete
-                </p>
-              )}
-              {msg.chat_mode === 'spy' && (
-                <p className="text-xs opacity-50 flex items-center gap-1">
-                  🕵️ No logs
+                  💣 Self-destruct
                 </p>
               )}
               <div className="flex items-center gap-2 text-xs opacity-70">
                 <span>{new Date(msg.created_at).toLocaleTimeString()}</span>
                 {msg.sender_id === user?.id && (
                   <span>
-                    {msg.read_by && msg.read_by.length > 0 ? "✓✓" : "✓"}
+                    {msg.read_by && msg.read_by.length > 1 ? "✓✓" : "✓"}
                   </span>
                 )}
               </div>

@@ -22,7 +22,7 @@ export const useSessions = () => {
             expires_at,
             security_level,
             is_active,
-            session_participants (count)
+            session_participants (user_id)
           )
         `)
         .eq("user_id", user.id);
@@ -40,7 +40,7 @@ export const useSessions = () => {
             return {
               id: session.id,
               name: session.name,
-              participants: session.session_participants?.[0]?.count || 0,
+              participants: session.session_participants?.length || 0,
               timeLeft: minutesLeft > 0 ? `${minutesLeft}m` : "Expired",
               security: session.security_level,
             };
@@ -53,9 +53,9 @@ export const useSessions = () => {
 
     fetchSessions();
 
-    // Subscribe to realtime updates
-    const channel = supabase
-      .channel("sessions")
+    // Subscribe to realtime updates for sessions
+    const sessionsChannel = supabase
+      .channel("sessions-updates")
       .on(
         "postgres_changes",
         {
@@ -69,8 +69,25 @@ export const useSessions = () => {
       )
       .subscribe();
 
+    // Subscribe to realtime updates for session participants
+    const participantsChannel = supabase
+      .channel("participants-updates")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "session_participants",
+        },
+        () => {
+          fetchSessions();
+        }
+      )
+      .subscribe();
+
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(sessionsChannel);
+      supabase.removeChannel(participantsChannel);
     };
   }, [user]);
 
