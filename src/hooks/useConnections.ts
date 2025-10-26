@@ -16,7 +16,7 @@ export const useConnections = () => {
         // Fetch accepted connections
         const { data: acceptedData } = await (supabase as any)
           .from("connections")
-          .select("id, connected_user_id")
+          .select("id, connected_user_id, user_id")
           .eq("user_id", user.id)
           .eq("status", "accepted");
 
@@ -28,14 +28,40 @@ export const useConnections = () => {
             .select("id, display_name, username, status")
             .in("id", connectedUserIds);
 
+          // Fetch conversations where both users are participants
+          const { data: allConversations } = await (supabase as any)
+            .from("conversation_participants")
+            .select("conversation_id, user_id")
+            .in("user_id", [...connectedUserIds, user.id]);
+
+          // Group by conversation_id to find conversations with both users
+          const conversationMap = new Map();
+          allConversations?.forEach((cp: any) => {
+            if (!conversationMap.has(cp.conversation_id)) {
+              conversationMap.set(cp.conversation_id, []);
+            }
+            conversationMap.get(cp.conversation_id).push(cp.user_id);
+          });
+
           const formattedConnections = acceptedData.map((connection: any) => {
             const profile = profilesData?.find((p: any) => p.id === connection.connected_user_id);
+            
+            // Find conversation that includes both current user and connected user
+            let conversationId = null;
+            for (const [convId, participants] of conversationMap.entries()) {
+              if (participants.includes(user.id) && participants.includes(connection.connected_user_id)) {
+                conversationId = convId;
+                break;
+              }
+            }
+
             return {
               id: connection.id,
               userId: profile?.id || connection.connected_user_id,
               name: profile?.display_name || "Unknown",
               username: profile?.username || "unknown",
               status: profile?.status || "offline",
+              conversationId: conversationId,
             };
           });
 

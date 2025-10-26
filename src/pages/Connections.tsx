@@ -149,7 +149,13 @@ const Connections = () => {
                     </div>
                   </div>
                   
-                  <Button size="sm" variant="secondary" className="glass">
+                  <Button 
+                    size="sm" 
+                    variant="secondary" 
+                    className="glass"
+                    onClick={() => connection.conversationId && navigate(`/chat/${connection.conversationId}`)}
+                    disabled={!connection.conversationId}
+                  >
                     Message
                   </Button>
                 </div>

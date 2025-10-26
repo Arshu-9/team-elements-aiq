@@ -30,7 +30,7 @@ const Chat = () => {
   }, [user, loading, navigate]);
 
   const sendMessage = async () => {
-    if (!message.trim() || isStreaming || id !== "candy") return;
+    if (!message.trim() || isStreaming) return;
 
     const userMessage = { role: "user", content: message.trim() };
     setMessages((prev) => [...prev, userMessage]);
