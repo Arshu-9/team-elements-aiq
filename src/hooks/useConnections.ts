@@ -12,58 +12,71 @@ export const useConnections = () => {
     if (!user) return;
 
     const fetchConnections = async () => {
-      // Fetch accepted connections
-      const { data: accepted } = await (supabase as any)
-        .from("connections")
-        .select(`
-          id,
-          connected_user_id,
-          profiles:connected_user_id (
-            id,
-            display_name,
-            username,
-            status
-          )
-        `)
-        .eq("user_id", user.id)
-        .eq("status", "accepted");
+      try {
+        // Fetch accepted connections
+        const { data: acceptedData } = await (supabase as any)
+          .from("connections")
+          .select("id, connected_user_id")
+          .eq("user_id", user.id)
+          .eq("status", "accepted");
 
-      // Fetch pending requests
-      const { data: pending } = await (supabase as any)
-        .from("connections")
-        .select(`
-          id,
-          user_id,
-          profiles:user_id (
-            id,
-            display_name,
-            username
-          )
-        `)
-        .eq("connected_user_id", user.id)
-        .eq("status", "pending");
+        // Fetch profiles for accepted connections
+        if (acceptedData && acceptedData.length > 0) {
+          const connectedUserIds = acceptedData.map((c: any) => c.connected_user_id);
+          const { data: profilesData } = await (supabase as any)
+            .from("profiles")
+            .select("id, display_name, username, status")
+            .in("id", connectedUserIds);
 
-      if (accepted) {
-        setConnections(
-          accepted.map((c: any) => ({
-            id: c.id,
-            userId: c.profiles.id,
-            name: c.profiles.display_name,
-            username: c.profiles.username,
-            status: c.profiles.status,
-          }))
-        );
-      }
+          const formattedConnections = acceptedData.map((connection: any) => {
+            const profile = profilesData?.find((p: any) => p.id === connection.connected_user_id);
+            return {
+              id: connection.id,
+              userId: profile?.id || connection.connected_user_id,
+              name: profile?.display_name || "Unknown",
+              username: profile?.username || "unknown",
+              status: profile?.status || "offline",
+            };
+          });
 
-      if (pending) {
-        setRequests(
-          pending.map((r: any) => ({
-            id: r.id,
-            userId: r.profiles.id,
-            name: r.profiles.display_name,
-            username: r.profiles.username,
-          }))
-        );
+          setConnections(formattedConnections);
+        } else {
+          setConnections([]);
+        }
+
+        // Fetch pending requests
+        const { data: pendingData } = await (supabase as any)
+          .from("connections")
+          .select("id, user_id")
+          .eq("connected_user_id", user.id)
+          .eq("status", "pending");
+
+        // Fetch profiles for pending requests
+        if (pendingData && pendingData.length > 0) {
+          const senderIds = pendingData.map((r: any) => r.user_id);
+          const { data: profilesData } = await (supabase as any)
+            .from("profiles")
+            .select("id, display_name, username")
+            .in("id", senderIds);
+
+          const formattedRequests = pendingData.map((request: any) => {
+            const profile = profilesData?.find((p: any) => p.id === request.user_id);
+            return {
+              id: request.id,
+              userId: profile?.id || request.user_id,
+              name: profile?.display_name || "Unknown",
+              username: profile?.username || "unknown",
+            };
+          });
+
+          setRequests(formattedRequests);
+        } else {
+          setRequests([]);
+        }
+      } catch (error) {
+        console.error("Error fetching connections:", error);
+        setConnections([]);
+        setRequests([]);
       }
 
       setLoading(false);
