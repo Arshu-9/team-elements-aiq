@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import TopBar from "@/components/TopBar";
 import BottomNav from "@/components/BottomNav";
@@ -12,12 +12,25 @@ const Home = () => {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const { conversations, loading: convLoading } = useConversations();
+  const [candyAiEnabled, setCandyAiEnabled] = useState(() => {
+    const saved = localStorage.getItem("candyAiEnabled");
+    return saved !== null ? JSON.parse(saved) : true;
+  });
 
   useEffect(() => {
     if (!loading && !user) {
       navigate("/auth");
     }
   }, [user, loading, navigate]);
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const saved = localStorage.getItem("candyAiEnabled");
+      setCandyAiEnabled(saved !== null ? JSON.parse(saved) : true);
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
 
   if (loading || !user) {
     return <div className="min-h-screen gradient-animated flex items-center justify-center">
@@ -33,29 +46,31 @@ const Home = () => {
       <TopBar title="Dashboard" rightElement={<SecurityBadge />} />
       
       <div className="max-w-screen-xl mx-auto px-4 py-6 space-y-6">
-        {/* Candy AI Assistant - Permanent Smart Contact */}
-        <div
-          className="glass rounded-3xl p-6 border-primary/30 elegant-glow cursor-pointer transition-smooth hover:scale-[1.02] elegant-shimmer"
-          onClick={() => navigate("/chat/candy")}
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center elegant-glow">
-              <Bot className="w-7 h-7 text-white" />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-lg flex items-center gap-2">
-                Candy 🍬 AI Assistant
-                <Badge variant="secondary" className="text-xs">
-                  <Sparkles className="w-3 h-3 mr-1" />
-                  AI-Powered
-                </Badge>
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Your intelligent companion • Smart analysis • Privacy-first
-              </p>
+        {/* Candy AI Assistant - Conditional based on settings */}
+        {candyAiEnabled && (
+          <div
+            className="glass rounded-3xl p-6 border-primary/30 elegant-glow cursor-pointer transition-smooth hover:scale-[1.02] elegant-shimmer animate-fade-in"
+            onClick={() => navigate("/chat/candy")}
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center elegant-glow">
+                <Bot className="w-7 h-7 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-lg flex items-center gap-2">
+                  Candy 🍬 AI Assistant
+                  <Badge variant="secondary" className="text-xs">
+                    <Sparkles className="w-3 h-3 mr-1" />
+                    AI-Powered
+                  </Badge>
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Your intelligent companion • Smart analysis • Privacy-first
+                </p>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Chat List */}
         <div className="space-y-3">
