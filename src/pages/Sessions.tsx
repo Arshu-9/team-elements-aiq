@@ -256,6 +256,19 @@ const Sessions = () => {
       <TopBar title="Secure Sessions" />
       
       <div className="max-w-screen-xl mx-auto px-4 py-6 space-y-6">
+        {/* Peer-to-Peer Info Banner */}
+        <div className="glass rounded-2xl p-4 border-primary/30 elegant-glow-sm">
+          <div className="flex items-center gap-3">
+            <Shield className="w-6 h-6 text-primary elegant-glow-sm animate-pulse" />
+            <div className="flex-1">
+              <h3 className="font-semibold text-sm">🔐 Peer-to-Peer Secure Sessions</h3>
+              <p className="text-xs text-muted-foreground">
+                Direct encrypted communication with quantum keys. AI guards against unauthorized access with automatic key rotation.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Action Buttons */}
         <div className="grid grid-cols-2 gap-4">
           <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>

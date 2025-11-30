@@ -10,6 +10,9 @@ interface IntrusionAttempt {
   device_info?: any;
   ip_address?: string;
   reason: string;
+  profile?: {
+    display_name: string;
+  };
 }
 
 interface IntrusionAlertsProps {
@@ -26,7 +29,10 @@ export const IntrusionAlerts = ({ sessionId, isCreator }: IntrusionAlertsProps) 
     const fetchAttempts = async () => {
       const { data, error } = await (supabase as any)
         .from("intrusion_attempts")
-        .select("*")
+        .select(`
+          *,
+          profile:profiles!attempted_by_user_id(display_name)
+        `)
         .eq("session_id", sessionId)
         .order("attempt_timestamp", { ascending: false })
         .limit(5);
@@ -70,11 +76,16 @@ export const IntrusionAlerts = ({ sessionId, isCreator }: IntrusionAlertsProps) 
       
       <div className="space-y-2">
         {attempts.map((attempt) => (
-          <div key={attempt.id} className="bg-red-500/10 p-3 rounded-lg border border-red-500/30">
+          <div key={attempt.id} className="bg-red-500/10 p-3 rounded-lg border border-red-500/30 animate-fade-in">
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1">
-                <p className="text-sm font-semibold text-red-500">{attempt.reason}</p>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                <p className="text-sm font-semibold text-red-500">
+                  🚨 {(attempt as any).profile?.display_name || "Unknown user"} tried to enter session
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  AI blocked the user and changed the session key
+                </p>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
                   <Clock className="w-3 h-3" />
                   <span>{new Date(attempt.attempt_timestamp).toLocaleString()}</span>
                 </div>

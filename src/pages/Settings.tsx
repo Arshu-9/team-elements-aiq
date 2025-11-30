@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import TopBar from "@/components/TopBar";
 import BottomNav from "@/components/BottomNav";
@@ -7,16 +7,30 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
 import { Bot, Shield, Bell, Sparkles, Lock } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { toast } from "@/hooks/use-toast";
 
 const Settings = () => {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
+  const [candyAiEnabled, setCandyAiEnabled] = useState(() => {
+    const saved = localStorage.getItem("candyAiEnabled");
+    return saved !== null ? JSON.parse(saved) : true;
+  });
 
   useEffect(() => {
     if (!loading && !user) {
       navigate("/auth");
     }
   }, [user, loading, navigate]);
+
+  const handleCandyAiToggle = (checked: boolean) => {
+    setCandyAiEnabled(checked);
+    localStorage.setItem("candyAiEnabled", JSON.stringify(checked));
+    toast({
+      title: checked ? "Candy AI Enabled" : "Candy AI Disabled",
+      description: checked ? "AI assistant is now visible" : "AI assistant is now hidden",
+    });
+  };
 
   if (loading || !user) {
     return <div className="min-h-screen gradient-animated flex items-center justify-center">
@@ -88,6 +102,20 @@ const Settings = () => {
                 <p className="text-xs text-muted-foreground">Scan links and attachments for threats</p>
               </div>
               <Switch id="malware-detection" defaultChecked />
+            </div>
+
+            <Separator className="bg-border/50" />
+
+            <div className="flex items-center justify-between p-3 rounded-xl hover:bg-primary/5 transition-colors">
+              <div className="space-y-1">
+                <Label htmlFor="candy-ai-enabled" className="text-base">🍬 Show Candy AI</Label>
+                <p className="text-xs text-muted-foreground">Toggle visibility of AI assistant in chats</p>
+              </div>
+              <Switch 
+                id="candy-ai-enabled" 
+                checked={candyAiEnabled}
+                onCheckedChange={handleCandyAiToggle}
+              />
             </div>
           </div>
 
