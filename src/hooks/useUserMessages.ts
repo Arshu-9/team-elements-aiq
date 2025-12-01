@@ -1,37 +1,28 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-export interface SessionMessage {
+interface UserMessage {
   id: string;
-  session_id: string;
-  sender_id: string;
   content: string;
-  encrypted_content?: string;
-  chat_mode: 'normal' | 'self-destruct';
-  is_deleted: boolean;
-  read_by?: string[];
-  delivered_to?: string[];
-  auto_delete_at?: string;
+  sender_id: string;
   created_at: string;
+  is_read: boolean;
+  conversation_id: string;
   sender?: {
     display_name: string;
+    username: string;
     avatar_url?: string;
   };
-  reactions?: Array<{
-    id: string;
-    emoji: string;
-    user_id: string;
-  }>;
 }
 
-export const useSessionMessages = (sessionId: string | undefined) => {
-  const [messages, setMessages] = useState<SessionMessage[]>([]);
+export const useUserMessages = (conversationId: string | undefined) => {
+  const [messages, setMessages] = useState<UserMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [sendingMessageId, setSendingMessageId] = useState<string | null>(null);
-  const messageMapRef = useRef<Map<string, SessionMessage>>(new Map());
+  const messageMapRef = useRef<Map<string, UserMessage>>(new Map());
 
   useEffect(() => {
-    if (!sessionId) {
+    if (!conversationId) {
       setLoading(false);
       return;
     }
@@ -39,19 +30,23 @@ export const useSessionMessages = (sessionId: string | undefined) => {
     const fetchMessages = async () => {
       try {
         const { data, error } = await (supabase as any)
-          .from("session_messages")
+          .from("messages")
           .select(`
-            *,
-            sender:profiles!sender_id(display_name, avatar_url)
+            id,
+            content,
+            sender_id,
+            created_at,
+            is_read,
+            conversation_id,
+            profiles:sender_id (display_name, username, avatar_url)
           `)
-          .eq("session_id", sessionId)
-          .eq("is_deleted", false)
+          .eq("conversation_id", conversationId)
           .order("created_at", { ascending: true });
 
         if (error) throw error;
 
         const messageList = data || [];
-        messageList.forEach((msg: SessionMessage) => {
+        messageList.forEach((msg: UserMessage) => {
           messageMapRef.current.set(msg.id, msg);
         });
         setMessages(messageList);
@@ -65,25 +60,29 @@ export const useSessionMessages = (sessionId: string | undefined) => {
     fetchMessages();
 
     const channel = supabase
-      .channel(`session-messages-${sessionId}`)
+      .channel(`conversation:${conversationId}`)
       .on(
         "postgres_changes",
         {
           event: "INSERT",
           schema: "public",
-          table: "session_messages",
-          filter: `session_id=eq.${sessionId}`,
+          table: "messages",
+          filter: `conversation_id=eq.${conversationId}`,
         },
-        async (payload) => {
+        async (payload: any) => {
           if (messageMapRef.current.has(payload.new.id)) return;
 
-          const { data: senderData } = await (supabase as any)
+          const { data: profile } = await (supabase as any)
             .from("profiles")
-            .select("display_name, avatar_url")
+            .select("display_name, username, avatar_url")
             .eq("id", payload.new.sender_id)
             .single();
 
-          const newMessage = { ...payload.new, sender: senderData } as SessionMessage;
+          const newMessage = {
+            ...payload.new,
+            sender: profile,
+          } as UserMessage;
+
           messageMapRef.current.set(newMessage.id, newMessage);
 
           setMessages((prev) => {
@@ -100,23 +99,18 @@ export const useSessionMessages = (sessionId: string | undefined) => {
         {
           event: "UPDATE",
           schema: "public",
-          table: "session_messages",
-          filter: `session_id=eq.${sessionId}`,
+          table: "messages",
+          filter: `conversation_id=eq.${conversationId}`,
         },
-        (payload) => {
-          if (payload.new.is_deleted) {
-            messageMapRef.current.delete(payload.new.id);
-            setMessages((prev) => prev.filter((msg) => msg.id !== payload.new.id));
-          } else {
-            const updatedMessage = { ...messageMapRef.current.get(payload.new.id), ...payload.new };
-            messageMapRef.current.set(payload.new.id, updatedMessage);
-            
-            setMessages((prev) =>
-              prev.map((msg) =>
-                msg.id === payload.new.id ? updatedMessage : msg
-              )
-            );
-          }
+        (payload: any) => {
+          const updatedMessage = { ...messageMapRef.current.get(payload.new.id), ...payload.new };
+          messageMapRef.current.set(payload.new.id, updatedMessage);
+          
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === payload.new.id ? updatedMessage : msg
+            )
+          );
         }
       )
       .subscribe();
@@ -124,28 +118,10 @@ export const useSessionMessages = (sessionId: string | undefined) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [sessionId]);
+  }, [conversationId]);
 
-  // Handle auto-deletion of self-destruct messages
-  useEffect(() => {
-    const checkForDeletion = () => {
-      messages.forEach((msg) => {
-        if (msg.auto_delete_at && new Date(msg.auto_delete_at) <= new Date() && !msg.is_deleted) {
-          // Mark message as deleted in database
-          supabase
-            .from("session_messages")
-            .update({ is_deleted: true })
-            .eq("id", msg.id);
-        }
-      });
-    };
-
-    const interval = setInterval(checkForDeletion, 1000);
-    return () => clearInterval(interval);
-  }, [messages]);
-
-  const sendMessage = async (content: string, chatMode: 'normal' | 'self-destruct' = 'normal') => {
-    if (!sessionId) return;
+  const sendMessage = async (content: string) => {
+    if (!conversationId) return;
 
     const tempId = `temp-${Date.now()}`;
     setSendingMessageId(tempId);
@@ -154,29 +130,28 @@ export const useSessionMessages = (sessionId: string | undefined) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      const optimisticMessage: SessionMessage = {
+      const optimisticMessage: UserMessage = {
         id: tempId,
-        session_id: sessionId,
+        conversation_id: conversationId,
         sender_id: user.id,
         content,
-        chat_mode: chatMode,
-        is_deleted: false,
+        is_read: false,
         created_at: new Date().toISOString(),
         sender: {
           display_name: "You",
-          avatar_url: undefined,
+          username: "you",
         },
       };
 
       setMessages((prev) => [...prev, optimisticMessage]);
 
       const { data, error } = await (supabase as any)
-        .from("session_messages")
+        .from("messages")
         .insert({
-          session_id: sessionId,
+          conversation_id: conversationId,
           sender_id: user.id,
-          content,
-          chat_mode: chatMode,
+          content: content.trim(),
+          is_read: false,
         })
         .select()
         .single();
@@ -203,21 +178,11 @@ export const useSessionMessages = (sessionId: string | undefined) => {
       if (!user) return;
 
       const message = messages.find((m) => m.id === messageId);
-      if (!message) return;
-
-      const readBy = message.read_by || [];
-      if (readBy.includes(user.id)) return;
-
-      const updates: any = { read_by: [...readBy, user.id] };
-      
-      // If self-destruct mode and this is the last unread user, set auto_delete_at
-      if (message.chat_mode === 'self-destruct') {
-        updates.auto_delete_at = new Date(Date.now() + 10000).toISOString();
-      }
+      if (!message || message.sender_id === user.id || message.is_read) return;
 
       await (supabase as any)
-        .from("session_messages")
-        .update(updates)
+        .from("messages")
+        .update({ is_read: true })
         .eq("id", messageId);
     } catch (error) {
       console.error("Error marking message as read:", error);
