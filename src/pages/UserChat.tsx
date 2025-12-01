@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserMessages } from "@/hooks/useUserMessages";
+import { useRealtimeConnection } from "@/hooks/useRealtimeConnection";
+import { useOfflineQueue } from "@/hooks/useOfflineQueue";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { ChatHeader } from "@/components/chat/ChatHeader";
@@ -11,36 +14,28 @@ import { ProfileDrawer } from "@/components/chat/ProfileDrawer";
 import { MessageOptionsMenu } from "@/components/chat/MessageOptionsMenu";
 import { EmptyState } from "@/components/chat/EmptyState";
 import { TypingIndicator } from "@/components/TypingIndicator";
-
-interface Message {
-  id: string;
-  content: string;
-  sender_id: string;
-  created_at: string;
-  is_read: boolean;
-  sender?: {
-    display_name: string;
-    username: string;
-    avatar_url?: string;
-  };
-}
+import { ConnectionStatus } from "@/components/ConnectionStatus";
 
 const UserChat = () => {
   const { id: conversationId } = useParams();
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const { messages, loading, sendMessage: sendMessageHook, markAsRead } = useUserMessages(conversationId);
+  const { status } = useRealtimeConnection(`conversation:${conversationId}`);
+  const { queueLength, isOnline } = useOfflineQueue();
+  
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [loading, setLoading] = useState(true);
   const [otherUser, setOtherUser] = useState<any>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [hasNewMessages, setHasNewMessages] = useState(false);
   const [showProfileDrawer, setShowProfileDrawer] = useState(false);
   const [replyTo, setReplyTo] = useState<{ content: string; sender: string } | undefined>();
   const [typingUsers, setTypingUsers] = useState<any[]>([]);
+  const [isSending, setIsSending] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const messageRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   const scrollToBottom = (smooth = true) => {
     messagesEndRef.current?.scrollIntoView({ behavior: smooth ? "smooth" : "auto" });
@@ -75,6 +70,30 @@ const UserChat = () => {
   }, [messages]);
 
   useEffect(() => {
+    if (!user) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const messageId = entry.target.getAttribute("data-message-id");
+            const senderId = entry.target.getAttribute("data-sender-id");
+            if (messageId && senderId !== user.id) {
+              markAsRead(messageId);
+            }
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+
+    messageRefs.current.forEach((ref) => {
+      if (ref) observer.observe(ref);
+    });
+
+    return () => observer.disconnect();
+  }, [messages, user, markAsRead]);
+
+  useEffect(() => {
     if (!authLoading && !user) {
       navigate("/auth");
       return;
@@ -100,94 +119,30 @@ const UserChat = () => {
 
           setOtherUser(profile);
         }
-
-        const { data: messagesData } = await (supabase as any)
-          .from("messages")
-          .select(`
-            id,
-            content,
-            sender_id,
-            created_at,
-            is_read,
-            profiles:sender_id (display_name, username, avatar_url)
-          `)
-          .eq("conversation_id", conversationId)
-          .order("created_at", { ascending: true });
-
-        if (messagesData) {
-          setMessages(messagesData);
-        }
       } catch (error) {
         console.error("Error fetching conversation:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load conversation",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchConversationData();
-
-    const channel = supabase
-      .channel(`conversation:${conversationId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "messages",
-          filter: `conversation_id=eq.${conversationId}`,
-        },
-        async (payload: any) => {
-          const { data: profile } = await (supabase as any)
-            .from("profiles")
-            .select("display_name, username, avatar_url")
-            .eq("id", payload.new.sender_id)
-            .single();
-
-          setMessages((prev) => [
-            ...prev,
-            {
-              ...payload.new,
-              sender: profile,
-            },
-          ]);
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, [conversationId, user, authLoading, navigate]);
 
   const sendMessage = async () => {
-    if (!message.trim() || !conversationId || !user) return;
+    if (!message.trim() || !conversationId || !user || isSending) return;
 
+    setIsSending(true);
     try {
-      const { error } = await (supabase as any)
-        .from("messages")
-        .insert({
-          conversation_id: conversationId,
-          sender_id: user.id,
-          content: message.trim(),
-          is_read: false,
-        });
-
-      if (error) throw error;
-
+      await sendMessageHook(message);
       setMessage("");
       setReplyTo(undefined);
     } catch (error) {
-      console.error("Error sending message:", error);
       toast({
-        title: "Error",
-        description: "Failed to send message",
+        title: "Failed to send",
+        description: "Tap to retry",
         variant: "destructive",
       });
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -203,7 +158,7 @@ const UserChat = () => {
     setReplyTo({ content, sender: senderName });
   };
 
-  const groupMessages = (messages: Message[]) => {
+  const groupMessages = (messages: any[]) => {
     const grouped: any[] = [];
     messages.forEach((msg, index) => {
       const prevMsg = messages[index - 1];
@@ -227,6 +182,8 @@ const UserChat = () => {
 
   return (
     <div className="min-h-screen gradient-animated flex flex-col">
+      <ConnectionStatus status={isOnline ? status : "disconnected"} queueLength={queueLength} />
+      
       <ChatHeader
         name={otherUser?.display_name || "User"}
         avatar={otherUser?.avatar_url}
@@ -244,24 +201,32 @@ const UserChat = () => {
           <EmptyState />
         ) : (
           groupedMessages.map((msg) => (
-            <MessageOptionsMenu
+            <div
               key={msg.id}
-              onCopy={() => handleCopyMessage(msg.content)}
-              onReply={() => handleReplyToMessage(msg.content, msg.sender?.display_name || "User")}
-              onReact={() => {}}
-              canDelete={msg.sender_id === user.id}
+              ref={(el) => {
+                if (el) messageRefs.current.set(msg.id, el);
+              }}
+              data-message-id={msg.id}
+              data-sender-id={msg.sender_id}
             >
-              <MessageBubble
-                id={msg.id}
-                content={msg.content}
-                timestamp={msg.created_at}
-                isOwn={msg.sender_id === user.id}
-                senderName={msg.sender?.display_name}
-                senderAvatar={msg.sender?.avatar_url}
-                isGrouped={msg.isGrouped}
-                isRead={msg.is_read}
-              />
-            </MessageOptionsMenu>
+              <MessageOptionsMenu
+                onCopy={() => handleCopyMessage(msg.content)}
+                onReply={() => handleReplyToMessage(msg.content, msg.sender?.display_name || "User")}
+                onReact={() => {}}
+                canDelete={msg.sender_id === user.id}
+              >
+                <MessageBubble
+                  id={msg.id}
+                  content={msg.content}
+                  timestamp={msg.created_at}
+                  isOwn={msg.sender_id === user.id}
+                  senderName={msg.sender?.display_name}
+                  senderAvatar={msg.sender?.avatar_url}
+                  isGrouped={msg.isGrouped}
+                  isRead={msg.is_read}
+                />
+              </MessageOptionsMenu>
+            </div>
           ))
         )}
         
@@ -279,6 +244,7 @@ const UserChat = () => {
         value={message}
         onChange={setMessage}
         onSend={sendMessage}
+        disabled={isSending}
         replyTo={replyTo}
         onCancelReply={() => setReplyTo(undefined)}
       />

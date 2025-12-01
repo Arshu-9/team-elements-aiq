@@ -4,6 +4,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSessionMessages } from "@/hooks/useSessionMessages";
 import { useTypingIndicator } from "@/hooks/useTypingIndicator";
 import { useSyncedChatMode } from "@/hooks/useSyncedChatMode";
+import { useRealtimeConnection } from "@/hooks/useRealtimeConnection";
+import { useOfflineQueue } from "@/hooks/useOfflineQueue";
 import { Shield, Users, X, Key, Copy, Check, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ChatHeader } from "@/components/chat/ChatHeader";
@@ -14,6 +16,7 @@ import { MessageOptionsMenu } from "@/components/chat/MessageOptionsMenu";
 import { TypingIndicator } from "@/components/TypingIndicator";
 import { ChatModeSelector } from "@/components/ChatModeSelector";
 import { SessionTimer } from "@/components/SessionTimer";
+import { ConnectionStatus } from "@/components/ConnectionStatus";
 import { FileUploadButton } from "@/components/FileUploadButton";
 import { ScreenshotProtection } from "@/components/ScreenshotProtection";
 import { SessionFiles } from "@/components/SessionFiles";
@@ -31,6 +34,8 @@ const SessionChat = () => {
   const { messages, loading, sendMessage, markAsRead } = useSessionMessages(id);
   const { typingUsers, setTyping } = useTypingIndicator(id);
   const { chatMode, updateChatMode } = useSyncedChatMode(id);
+  const { status } = useRealtimeConnection(`session-${id}`);
+  const { queueLength, isOnline } = useOfflineQueue();
   
   const [message, setMessage] = useState("");
   const [session, setSession] = useState<any>(null);
@@ -244,8 +249,8 @@ const SessionChat = () => {
       setReplyTo(undefined);
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to send message",
+        title: "Failed to send",
+        description: "Tap to retry",
         variant: "destructive",
       });
     } finally {
@@ -337,6 +342,7 @@ const SessionChat = () => {
   return (
     <div className="min-h-screen gradient-animated flex flex-col">
       <ScreenshotProtection />
+      <ConnectionStatus status={isOnline ? status : "disconnected"} queueLength={queueLength} />
 
       <AlertDialog open={showDestroyDialog} onOpenChange={setShowDestroyDialog}>
         <AlertDialogContent className="glass border-destructive/50">
