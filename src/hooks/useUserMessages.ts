@@ -29,27 +29,34 @@ export const useUserMessages = (conversationId: string | undefined) => {
 
     const fetchMessages = async () => {
       try {
-        const { data, error } = await (supabase as any)
+        const { data: messagesData, error } = await (supabase as any)
           .from("messages")
-          .select(`
-            id,
-            content,
-            sender_id,
-            created_at,
-            is_read,
-            conversation_id,
-            profiles:sender_id (display_name, username, avatar_url)
-          `)
+          .select("*")
           .eq("conversation_id", conversationId)
           .order("created_at", { ascending: true });
 
         if (error) throw error;
 
-        const messageList = data || [];
-        messageList.forEach((msg: UserMessage) => {
+        const messageList = messagesData || [];
+        
+        // Fetch sender profiles separately
+        const senderIds = [...new Set(messageList.map((m: any) => m.sender_id))];
+        const { data: profiles } = await (supabase as any)
+          .from("profiles")
+          .select("id, display_name, username, avatar_url")
+          .in("id", senderIds);
+
+        const profileMap = new Map(profiles?.map((p: any) => [p.id, p]) || []);
+
+        const messagesWithProfiles = messageList.map((msg: any) => ({
+          ...msg,
+          sender: profileMap.get(msg.sender_id),
+        }));
+
+        messagesWithProfiles.forEach((msg: UserMessage) => {
           messageMapRef.current.set(msg.id, msg);
         });
-        setMessages(messageList);
+        setMessages(messagesWithProfiles);
       } catch (error) {
         console.error("Error fetching messages:", error);
       } finally {
