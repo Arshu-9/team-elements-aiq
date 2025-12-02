@@ -252,14 +252,14 @@ const Sessions = () => {
   }
 
   return (
-    <div className="min-h-screen gradient-animated pb-20 pt-20">
+    <div className="min-h-screen bg-surface pb-20 pt-20">
       <TopBar title="Secure Sessions" />
       
       <div className="max-w-screen-xl mx-auto px-4 py-6 space-y-6">
         {/* Peer-to-Peer Info Banner */}
-        <div className="glass rounded-2xl p-4 border-primary/30 elegant-glow-sm">
+        <div className="card-elevated-2 p-4">
           <div className="flex items-center gap-3">
-            <Shield className="w-6 h-6 text-primary elegant-glow-sm animate-pulse" />
+            <Shield className="w-6 h-6 text-primary" />
             <div className="flex-1">
               <h3 className="font-semibold text-sm">🔐 Peer-to-Peer Secure Sessions</h3>
               <p className="text-xs text-muted-foreground">
@@ -273,12 +273,12 @@ const Sessions = () => {
         <div className="grid grid-cols-2 gap-4">
           <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="h-24 glass border-primary/30 elegant-glow hover:scale-105 transition-smooth flex-col gap-2">
+              <Button className="h-24 card-elevated-3 hover:shadow-lg transition-smooth flex-col gap-2">
                 <Plus className="w-8 h-8" />
                 <span>Create Session</span>
               </Button>
             </DialogTrigger>
-            <DialogContent className="glass border-primary/30">
+            <DialogContent className="card-elevated-3">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   <Lock className="w-5 h-5 text-primary" />
@@ -290,7 +290,6 @@ const Sessions = () => {
                   <Label>Session Name</Label>
                   <Input 
                     placeholder="Enter session name" 
-                    className="glass border-primary/30"
                     value={sessionName}
                     onChange={(e) => setSessionName(e.target.value)}
                   />
@@ -299,10 +298,10 @@ const Sessions = () => {
                 <div className="space-y-2">
                   <Label>Duration</Label>
                   <Select value={duration} onValueChange={setDuration}>
-                    <SelectTrigger className="glass border-primary/30">
+                    <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="glass">
+                    <SelectContent>
                       <SelectItem value="5">5 minutes</SelectItem>
                       <SelectItem value="15">15 minutes</SelectItem>
                       <SelectItem value="30">30 minutes</SelectItem>
@@ -314,10 +313,10 @@ const Sessions = () => {
                 <div className="space-y-2">
                   <Label>Who can join?</Label>
                   <Select value={authenticity} onValueChange={setAuthenticity}>
-                    <SelectTrigger className="glass border-primary/30">
+                    <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="glass">
+                    <SelectContent>
                       <SelectItem value="anyone">
                         <div>
                           <div className="font-semibold">Anyone with key</div>
@@ -335,13 +334,13 @@ const Sessions = () => {
                 </div>
 
                 {generatedKey && (
-                  <div className="space-y-4 p-6 glass rounded-xl border-primary/50 elegant-glow-sm animate-fade-in">
+                  <div className="space-y-4 p-6 card-elevated-2 animate-fade-in">
                     <div className="text-center space-y-2">
                       <div className="flex items-center justify-center gap-2">
-                        <Shield className="w-5 h-5 text-primary elegant-glow-sm" />
+                        <Shield className="w-5 h-5 text-primary" />
                         <Label className="text-primary font-semibold">Quantum Session Key</Label>
                       </div>
-                      <p className="text-3xl font-mono font-bold tracking-[0.5em] text-primary elegant-text">
+                      <p className="text-3xl font-mono font-bold tracking-[0.5em] text-primary">
                         {generatedKey}
                       </p>
                       <p className="text-xs text-muted-foreground">
@@ -386,7 +385,7 @@ const Sessions = () => {
 
                 <div className="flex gap-2">
                   <Button 
-                    className="flex-1 elegant-glow" 
+                    className="flex-1" 
                     onClick={generateQRNGKey}
                     disabled={isCreating}
                   >
@@ -412,12 +411,12 @@ const Sessions = () => {
 
           <Dialog open={joinDialogOpen} onOpenChange={setJoinDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="secondary" className="h-24 glass border-primary/30 hover:scale-105 transition-smooth flex-col gap-2">
+              <Button variant="secondary" className="h-24 card-elevated-3 hover:shadow-lg transition-smooth flex-col gap-2">
                 <Key className="w-8 h-8" />
                 <span>Join Session</span>
               </Button>
             </DialogTrigger>
-            <DialogContent className="glass border-primary/30">
+            <DialogContent className="card-elevated-3">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   <Key className="w-5 h-5 text-primary" />
@@ -431,7 +430,7 @@ const Sessions = () => {
                     placeholder="Enter 7-character key"
                     value={sessionKey}
                     onChange={(e) => setSessionKey(e.target.value.toUpperCase())}
-                    className="glass border-primary/30 font-mono text-center text-lg tracking-[0.5em]"
+                    className="font-mono text-center text-lg tracking-[0.5em]"
                     maxLength={7}
                   />
                   <p className="text-xs text-muted-foreground text-center">
@@ -439,14 +438,14 @@ const Sessions = () => {
                   </p>
                 </div>
                 
-                <div className="text-center p-4 glass rounded-lg border-muted">
+                <div className="text-center p-4 card-elevated-1">
                   <p className="text-sm text-muted-foreground">
                     💡 Tip: Ask the session creator to show you their QR code
                   </p>
                 </div>
 
                 <Button 
-                  className="w-full elegant-glow"
+                  className="w-full"
                   onClick={joinSession}
                   disabled={isJoining || sessionKey.length !== 7}
                 >
@@ -454,7 +453,7 @@ const Sessions = () => {
                 </Button>
                 
                 {failedAttempts.get(sessionKey) && failedAttempts.get(sessionKey)! > 0 && (
-                  <div className="flex items-center gap-2 text-xs text-warning p-2 glass rounded-lg">
+                  <div className="flex items-center gap-2 text-xs text-warning p-2 card-elevated-1">
                     <AlertTriangle className="w-3 h-3" />
                     <span>Failed attempt detected. Be careful with access.</span>
                   </div>
@@ -466,17 +465,17 @@ const Sessions = () => {
 
         {/* Active Sessions */}
         <div className="space-y-3">
-          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider px-2">
+          <h2 className="text-lg font-semibold px-1">
             Active Sessions
           </h2>
           
           {loading ? (
-            <div className="glass rounded-3xl p-8 text-center">
+            <div className="card-elevated-2 p-8 text-center">
               <p className="text-muted-foreground">Loading sessions...</p>
             </div>
           ) : sessions.length === 0 ? (
-            <div className="glass rounded-3xl p-8 text-center">
-              <Shield className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+            <div className="card-elevated-2 p-8 text-center border-dashed">
+              <Shield className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
               <p className="text-muted-foreground mb-2">No active sessions</p>
               <p className="text-sm text-muted-foreground">
                 Create a new session to start secure group communication
@@ -484,13 +483,14 @@ const Sessions = () => {
             </div>
           ) : (
               sessions.map((session) => (
-                <div key={session.id} className="glass rounded-3xl p-4 border-primary/30 elegant-glow-sm hover:scale-[1.02] transition-smooth">
+                <div key={session.id} className="card-elevated-2 p-4 hover:shadow-lg transition-smooth cursor-pointer"
+                  onClick={() => navigate(`/session/${session.id}`)}>
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <Shield className="w-5 h-5 text-primary elegant-glow-sm" />
-                      <h3 className="font-semibold text-lg">{session.name}</h3>
+                      <Shield className="w-5 h-5 text-primary" />
+                      <h3 className="font-semibold text-base">{session.name}</h3>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-primary elegant-glow-sm">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Clock className="w-4 h-4" />
                       {session.timeLeft}
                     </div>
@@ -505,9 +505,11 @@ const Sessions = () => {
                     </div>
                     
                     <Button 
-                      size="sm" 
-                      className="elegant-glow-sm"
-                      onClick={() => navigate(`/session/${session.id}`)}
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/session/${session.id}`);
+                      }}
                     >
                       Enter
                     </Button>
