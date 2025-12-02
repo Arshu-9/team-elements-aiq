@@ -2,77 +2,83 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Material Design 3 System
-   All colors MUST be HSL.
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
 */
 
 @layer base {
   :root {
-    /* Light theme - Material Design 3 */
-    --background: 0 0% 100%;
-    --foreground: 240 10% 4%;
+    /* AI-Q Premium Lavender & Creamy Theme */
+    --background: 270 35% 96%;
+    --foreground: 270 15% 20%;
 
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 4%;
+    --card-foreground: 270 15% 20%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 4%;
+    --popover-foreground: 270 15% 20%;
 
-    /* Soft Primary - Material Blue */
-    --primary: 210 70% 45%;
+    /* Lavender Primary */
+    --primary: 270 70% 65%;
     --primary-foreground: 0 0% 100%;
 
-    /* Soft Secondary */
-    --secondary: 240 5% 96%;
-    --secondary-foreground: 240 10% 4%;
+    --secondary: 270 40% 90%;
+    --secondary-foreground: 270 15% 30%;
 
-    --muted: 240 5% 96%;
-    --muted-foreground: 240 4% 46%;
+    --muted: 270 30% 94%;
+    --muted-foreground: 270 10% 50%;
 
-    /* Soft Accent */
-    --accent: 210 70% 95%;
-    --accent-foreground: 210 70% 45%;
+    /* Soft Lavender Accent */
+    --accent: 280 60% 70%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 0 70% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 6% 90%;
-    --input: 240 6% 90%;
-    --ring: 210 70% 45%;
+    --border: 270 20% 88%;
+    --input: 270 20% 88%;
+    --ring: 270 70% 65%;
 
-    --radius: 0.5rem;
+    --radius: 1.25rem;
 
-    /* Material Elevation Shadows */
-    --elevation-1: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --elevation-2: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
-    --elevation-3: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-    --elevation-4: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    /* Premium Glass Effect */
+    --glass-bg: 0 0% 100%;
+    --glass-border: 270 70% 85%;
     
-    /* Status Colors */
-    --success: 142 71% 45%;
-    --warning: 38 92% 50%;
+    /* Lavender Glow */
+    --glow-primary: 270 70% 65%;
+    --glow-secondary: 280 60% 70%;
+    
+    /* Success & Warning */
+    --success: 142 65% 55%;
+    --warning: 38 85% 60%;
+    
+    /* Security Level Colors */
+    --security-standard: 142 65% 55%;
+    --security-high: 38 85% 60%;
+    --security-maximum: 0 70% 60%;
   }
 
   .dark {
-    --background: 240 10% 4%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 8%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 8%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 210 70% 55%;
-    --primary-foreground: 240 10% 4%;
-    --secondary: 240 4% 16%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 4% 16%;
-    --muted-foreground: 240 5% 65%;
-    --accent: 210 70% 20%;
-    --accent-foreground: 210 70% 85%;
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 4% 16%;
-    --input: 240 4% 16%;
-    --ring: 210 70% 55%;
+    --background: 270 35% 96%;
+    --foreground: 270 15% 20%;
+    --card: 0 0% 100%;
+    --card-foreground: 270 15% 20%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 270 15% 20%;
+    --primary: 270 70% 65%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 270 40% 90%;
+    --secondary-foreground: 270 15% 30%;
+    --muted: 270 30% 94%;
+    --muted-foreground: 270 10% 50%;
+    --accent: 280 60% 70%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 70% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 270 20% 88%;
+    --input: 270 20% 88%;
+    --ring: 270 70% 65%;
   }
 }
 
@@ -83,43 +89,80 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Roboto', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    font-weight: 600;
+  /* Premium Glass Effect */
+  .glass {
+    background: hsl(var(--glass-bg) / 0.7);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid hsl(var(--glass-border) / 0.3);
+    box-shadow: 0 8px 32px hsl(270 70% 65% / 0.08);
   }
 
-  /* Material Design 3 Cards with Elevation */
-  .card-elevated-1 {
-    @apply bg-card border border-border rounded-lg;
-    box-shadow: var(--elevation-1);
+  /* Elegant Glow Effects */
+  .elegant-glow {
+    box-shadow: 0 4px 24px hsl(var(--glow-primary) / 0.15),
+                0 2px 12px hsl(var(--glow-primary) / 0.1);
   }
 
-  .card-elevated-2 {
-    @apply bg-card border border-border rounded-lg;
-    box-shadow: var(--elevation-2);
+  .elegant-glow-sm {
+    box-shadow: 0 2px 12px hsl(var(--glow-primary) / 0.1),
+                0 1px 6px hsl(var(--glow-primary) / 0.08);
   }
 
-  .card-elevated-3 {
-    @apply bg-card border border-border rounded-lg;
-    box-shadow: var(--elevation-3);
-  }
-
-  .card-elevated-4 {
-    @apply bg-card border border-border rounded-lg;
-    box-shadow: var(--elevation-4);
+  .elegant-text {
+    text-shadow: 0 2px 8px hsl(var(--glow-primary) / 0.2);
   }
 }
 
 @layer utilities {
   /* Smooth Transitions */
   .transition-smooth {
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  /* Simple Background */
-  .bg-surface {
-    @apply bg-background;
+  /* Premium Gradient Background */
+  .gradient-animated {
+    background: linear-gradient(
+      135deg,
+      hsl(270 45% 98%),
+      hsl(270 40% 96%),
+      hsl(280 45% 97%)
+    );
+    background-size: 200% 200%;
+    animation: gradient-shift 20s ease infinite;
+  }
+
+  @keyframes gradient-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  /* Elegant Shimmer Effect */
+  .elegant-shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .elegant-shimmer::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(var(--primary) / 0.15),
+      transparent
+    );
+    animation: shimmer 4s infinite;
+  }
+
+  @keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
   }
 }
