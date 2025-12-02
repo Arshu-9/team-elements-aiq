@@ -14,8 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        'orbitron': ['Orbitron', 'sans-serif'],
-        'exo': ['Exo 2', 'sans-serif'],
+        'roboto': ['Roboto', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -61,11 +60,6 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        neon: {
-          cyan: "hsl(var(--glow-cyan))",
-          purple: "hsl(var(--glow-purple))",
-          blue: "hsl(var(--glow-blue))",
-        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -88,32 +82,6 @@ export default {
         "slide-up": {
           "0%": { transform: "translateY(100%)" },
           "100%": { transform: "translateY(0)" }
-        },
-        "glow-pulse": {
-          "0%, 100%": { 
-            boxShadow: "0 0 20px hsl(190 95% 55% / 0.4)",
-            borderColor: "hsl(190 95% 55% / 0.4)"
-          },
-          "50%": { 
-            boxShadow: "0 0 40px hsl(190 95% 55% / 0.6), 0 0 60px hsl(190 95% 55% / 0.3)",
-            borderColor: "hsl(190 95% 55% / 0.8)"
-          }
-        },
-        "spin-slow": {
-          "0%": { transform: "rotate(0deg)" },
-          "100%": { transform: "rotate(360deg)" }
-        },
-        "neon-flicker": {
-          "0%, 100%": { opacity: "1" },
-          "41%": { opacity: "1" },
-          "42%": { opacity: "0.8" },
-          "43%": { opacity: "1" },
-          "45%": { opacity: "0.9" },
-          "46%": { opacity: "1" }
-        },
-        "float": {
-          "0%, 100%": { transform: "translateY(0px)" },
-          "50%": { transform: "translateY(-10px)" }
         }
       },
       animation: {
@@ -121,10 +89,6 @@ export default {
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.3s ease-out",
         "slide-up": "slide-up 0.3s ease-out",
-        "glow-pulse": "glow-pulse 2s ease-in-out infinite",
-        "spin-slow": "spin-slow 3s linear infinite",
-        "neon-flicker": "neon-flicker 3s linear infinite",
-        "float": "float 3s ease-in-out infinite",
       },
     },
   },

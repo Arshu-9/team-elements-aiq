@@ -2,85 +2,77 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Futuristic Advanced Design System
+/* Material Design 3 System
    All colors MUST be HSL.
 */
 
 @layer base {
   :root {
-    /* Deep Space Dark Theme */
-    --background: 220 25% 8%;
-    --foreground: 210 40% 98%;
+    /* Light theme - Material Design 3 */
+    --background: 0 0% 100%;
+    --foreground: 240 10% 4%;
 
-    --card: 220 20% 12%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 4%;
 
-    --popover: 220 22% 10%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 4%;
 
-    /* Electric Cyan Primary */
-    --primary: 190 95% 55%;
-    --primary-foreground: 220 25% 8%;
+    /* Soft Primary - Material Blue */
+    --primary: 210 70% 45%;
+    --primary-foreground: 0 0% 100%;
 
-    /* Deep Purple Secondary */
-    --secondary: 260 40% 20%;
-    --secondary-foreground: 210 40% 98%;
+    /* Soft Secondary */
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 240 10% 4%;
 
-    --muted: 220 15% 18%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 4% 46%;
 
-    /* Neon Purple Accent */
-    --accent: 280 85% 65%;
-    --accent-foreground: 220 25% 8%;
+    /* Soft Accent */
+    --accent: 210 70% 95%;
+    --accent-foreground: 210 70% 45%;
 
-    --destructive: 0 85% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 220 20% 20%;
-    --input: 220 20% 18%;
-    --ring: 190 95% 55%;
+    --border: 240 6% 90%;
+    --input: 240 6% 90%;
+    --ring: 210 70% 45%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
-    /* Futuristic Glass Effect */
-    --glass-bg: 220 20% 12%;
-    --glass-border: 190 95% 55%;
-    
-    /* Neon Glow Colors */
-    --glow-cyan: 190 95% 55%;
-    --glow-purple: 280 85% 65%;
-    --glow-blue: 220 90% 60%;
+    /* Material Elevation Shadows */
+    --elevation-1: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --elevation-2: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+    --elevation-3: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    --elevation-4: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
     
     /* Status Colors */
-    --success: 142 76% 60%;
-    --warning: 38 92% 65%;
-    
-    /* Security Level Colors */
-    --security-standard: 142 76% 60%;
-    --security-high: 38 92% 65%;
-    --security-maximum: 0 85% 60%;
+    --success: 142 71% 45%;
+    --warning: 38 92% 50%;
   }
 
   .dark {
-    --background: 220 25% 8%;
-    --foreground: 210 40% 98%;
-    --card: 220 20% 12%;
-    --card-foreground: 210 40% 98%;
-    --popover: 220 22% 10%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 190 95% 55%;
-    --primary-foreground: 220 25% 8%;
-    --secondary: 260 40% 20%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 220 15% 18%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 280 85% 65%;
-    --accent-foreground: 220 25% 8%;
-    --destructive: 0 85% 60%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 220 20% 20%;
-    --input: 220 20% 18%;
-    --ring: 190 95% 55%;
+    --background: 240 10% 4%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 8%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 8%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 210 70% 55%;
+    --primary-foreground: 240 10% 4%;
+    --secondary: 240 4% 16%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 4% 16%;
+    --muted-foreground: 240 5% 65%;
+    --accent: 210 70% 20%;
+    --accent-foreground: 210 70% 85%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 4% 16%;
+    --input: 240 4% 16%;
+    --ring: 210 70% 55%;
   }
 }
 
@@ -91,229 +83,43 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Exo 2', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    letter-spacing: 0.01em;
+    font-family: 'Roboto', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Orbitron', 'Exo 2', sans-serif;
     font-weight: 600;
-    letter-spacing: 0.02em;
   }
 
-  /* Futuristic Glass Effect */
-  .glass {
-    background: linear-gradient(
-      135deg,
-      hsl(var(--glass-bg) / 0.6),
-      hsl(var(--glass-bg) / 0.4)
-    );
-    backdrop-filter: blur(24px) saturate(200%);
-    border: 1px solid hsl(var(--glass-border) / 0.2);
-    box-shadow: 
-      0 8px 32px hsl(190 95% 55% / 0.1),
-      inset 0 1px 0 hsl(210 40% 98% / 0.05);
+  /* Material Design 3 Cards with Elevation */
+  .card-elevated-1 {
+    @apply bg-card border border-border rounded-lg;
+    box-shadow: var(--elevation-1);
   }
 
-  /* Neon Glow Effects */
-  .neon-glow {
-    box-shadow: 
-      0 0 20px hsl(var(--glow-cyan) / 0.3),
-      0 0 40px hsl(var(--glow-cyan) / 0.2),
-      0 0 60px hsl(var(--glow-cyan) / 0.1);
+  .card-elevated-2 {
+    @apply bg-card border border-border rounded-lg;
+    box-shadow: var(--elevation-2);
   }
 
-  .neon-glow-purple {
-    box-shadow: 
-      0 0 20px hsl(var(--glow-purple) / 0.3),
-      0 0 40px hsl(var(--glow-purple) / 0.2),
-      0 0 60px hsl(var(--glow-purple) / 0.1);
+  .card-elevated-3 {
+    @apply bg-card border border-border rounded-lg;
+    box-shadow: var(--elevation-3);
   }
 
-  .neon-border {
-    border: 1px solid hsl(var(--glow-cyan) / 0.5);
-    box-shadow: 
-      0 0 10px hsl(var(--glow-cyan) / 0.3),
-      inset 0 0 10px hsl(var(--glow-cyan) / 0.05);
-  }
-
-  .neon-text {
-    text-shadow: 
-      0 0 10px hsl(var(--glow-cyan) / 0.8),
-      0 0 20px hsl(var(--glow-cyan) / 0.5),
-      0 0 30px hsl(var(--glow-cyan) / 0.3);
-  }
-
-  /* Tech Grid Background */
-  .tech-grid {
-    background-image: 
-      linear-gradient(hsl(190 95% 55% / 0.05) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(190 95% 55% / 0.05) 1px, transparent 1px);
-    background-size: 50px 50px;
+  .card-elevated-4 {
+    @apply bg-card border border-border rounded-lg;
+    box-shadow: var(--elevation-4);
   }
 }
 
 @layer utilities {
   /* Smooth Transitions */
   .transition-smooth {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .transition-glow {
-    transition: box-shadow 0.3s ease, border-color 0.3s ease;
-  }
-
-  /* Futuristic Gradient Background */
-  .gradient-animated {
-    background: linear-gradient(
-      135deg,
-      hsl(220 30% 6%),
-      hsl(220 25% 8%),
-      hsl(230 28% 10%),
-      hsl(220 25% 8%)
-    );
-    background-size: 400% 400%;
-    animation: gradient-shift 15s ease infinite;
-    position: relative;
-  }
-
-  .gradient-animated::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(
-      circle at 20% 50%, 
-      hsl(190 95% 55% / 0.05) 0%, 
-      transparent 50%
-    ),
-    radial-gradient(
-      circle at 80% 80%, 
-      hsl(280 85% 65% / 0.05) 0%, 
-      transparent 50%
-    );
-    pointer-events: none;
-  }
-
-  @keyframes gradient-shift {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-  }
-
-  /* Cyber Scan Effect */
-  .cyber-scan {
-    position: relative;
-    overflow: hidden;
-  }
-
-  .cyber-scan::after {
-    content: '';
-    position: absolute;
-    top: -100%;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-      180deg,
-      transparent,
-      hsl(var(--primary) / 0.1),
-      transparent
-    );
-    animation: scan 3s ease-in-out infinite;
-  }
-
-  @keyframes scan {
-    0% { top: -100%; }
-    50% { top: 100%; }
-    100% { top: 100%; }
-  }
-
-  /* Holographic Shimmer */
-  .holo-shimmer {
-    position: relative;
-    overflow: hidden;
-  }
-
-  .holo-shimmer::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 50%;
-    height: 100%;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      hsl(var(--primary) / 0.2),
-      hsl(var(--accent) / 0.2),
-      transparent
-    );
-    animation: shimmer 3s infinite;
-  }
-
-  @keyframes shimmer {
-    0% { left: -100%; }
-    100% { left: 200%; }
-  }
-
-  /* Pulse Glow Animation */
-  .pulse-glow {
-    animation: pulse-glow 2s ease-in-out infinite;
-  }
-
-  @keyframes pulse-glow {
-    0%, 100% {
-      box-shadow: 0 0 20px hsl(var(--glow-cyan) / 0.3);
-    }
-    50% {
-      box-shadow: 0 0 40px hsl(var(--glow-cyan) / 0.5),
-                  0 0 60px hsl(var(--glow-cyan) / 0.3);
-    }
-  }
-
-  /* Slide Animations */
-  @keyframes slide-in-right {
-    from {
-      opacity: 0;
-      transform: translateX(-20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
-  @keyframes slide-out-right {
-    from {
-      opacity: 1;
-      transform: translateX(0);
-    }
-    to {
-      opacity: 0;
-      transform: translateX(20px);
-    }
-  }
-
-  .animate-slide-in-right {
-    animation: slide-in-right 0.3s ease-out;
-  }
-
-  .animate-slide-out-right {
-    animation: slide-out-right 0.3s ease-out;
-  }
-
-  /* Fade Scale Animation */
-  @keyframes fade-scale-in {
-    from {
-      opacity: 0;
-      transform: scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-
-  .animate-fade-scale-in {
-    animation: fade-scale-in 0.4s ease-out;
+  /* Simple Background */
+  .bg-surface {
+    @apply bg-background;
   }
 }
