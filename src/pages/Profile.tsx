@@ -4,10 +4,10 @@ import TopBar from "@/components/TopBar";
 import BottomNav from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import logo from "@/assets/logo.png";
-import { Mail, Calendar, Edit, Shield, LogOut, Copy, Check, IdCard } from "lucide-react";
+import { Mail, Calendar, Edit, Shield, LogOut, Copy, Check, Camera } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -66,84 +66,104 @@ const Profile = () => {
   };
 
   if (loading || !user) {
-    return <div className="min-h-screen gradient-animated flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-    </div>;
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen gradient-animated pb-20 pt-20">
+    <div className="min-h-screen bg-gradient-soft pb-24 pt-20">
       <TopBar title="Profile" />
       
-      <div className="max-w-screen-xl mx-auto px-4 py-6 space-y-6">
+      <div className="max-w-screen-xl mx-auto px-5 py-4 space-y-4">
         {/* Profile Header */}
-        <div className="glass rounded-3xl p-6 border-primary/30 elegant-glow text-center">
-          <div className="w-24 h-24 mx-auto rounded-full overflow-hidden bg-gradient-to-br from-primary to-accent elegant-glow mb-4">
-            {profile?.avatar_url ? (
-              <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <img src={logo} alt="AI-Q" className="w-16 h-16 object-contain" />
-              </div>
-            )}
+        <div className="card-modern p-6 text-center animate-fade-in">
+          <div className="relative inline-block">
+            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-3xl font-bold text-white">
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover rounded-full" />
+              ) : (
+                profile?.display_name?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase()
+              )}
+            </div>
+            <button className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-card border-2 border-background flex items-center justify-center shadow-soft">
+              <Camera className="w-4 h-4 text-muted-foreground" />
+            </button>
           </div>
-          <h2 className="text-2xl font-bold mb-1">{profile?.display_name || user.email}</h2>
-          <p className="text-muted-foreground">@{profile?.username || user.email?.split('@')[0]}</p>
+          
+          <h2 className="text-xl font-bold mt-4">{profile?.display_name || user.email}</h2>
+          <p className="text-sm text-muted-foreground">@{profile?.username || user.email?.split('@')[0]}</p>
+          
           {profile?.bio && (
-            <p className="text-sm text-muted-foreground mt-2">{profile.bio}</p>
+            <p className="text-sm text-muted-foreground mt-3 max-w-xs mx-auto">{profile.bio}</p>
           )}
           
-          <div className="flex items-center justify-center gap-2 mt-4">
-            <Shield className="w-4 h-4 text-primary" />
-            <span className="text-sm text-primary">Verified User</span>
+          <div className="flex items-center justify-center gap-1.5 mt-4 text-primary">
+            <Shield className="w-4 h-4" />
+            <span className="text-sm font-medium">Verified</span>
+          </div>
+        </div>
+
+        {/* User ID Card */}
+        <div 
+          className="card-modern p-4 cursor-pointer animate-fade-in"
+          onClick={copyUserId}
+          style={{ animationDelay: '50ms' }}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-muted-foreground mb-1">Your User ID</p>
+              <code className="text-sm font-mono text-foreground">{profile?.user_id}</code>
+            </div>
+            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl">
+              {copiedUserId ? (
+                <Check className="w-4 h-4 text-success" />
+              ) : (
+                <Copy className="w-4 h-4 text-muted-foreground" />
+              )}
+            </Button>
           </div>
         </div>
 
         {/* Profile Info */}
-        <div className="glass rounded-3xl p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-lg">Personal Information</h3>
+        <div className="card-modern p-4 space-y-0 animate-fade-in" style={{ animationDelay: '100ms' }}>
+          <div className="flex items-center justify-between py-3 border-b border-border/50">
+            <span className="text-sm font-medium">Personal Information</span>
             <Button 
               size="sm" 
-              variant="outline" 
-              className="glass border-primary/30"
+              variant="ghost" 
+              className="h-8 text-primary hover:text-primary/80"
               onClick={() => navigate("/profile/edit")}
             >
-              <Edit className="w-4 h-4 mr-2" />
+              <Edit className="w-4 h-4 mr-1.5" />
               Edit
             </Button>
           </div>
 
-          <div className="space-y-3">
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-secondary/50">
-              <IdCard className="w-5 h-5 text-primary" />
-              <div className="flex-1">
-                <p className="text-xs text-muted-foreground">User ID</p>
-                <code className="text-sm font-mono text-primary">{profile?.user_id}</code>
+          <div className="divide-y divide-border/50">
+            <div className="flex items-center gap-3 py-3">
+              <div className="w-9 h-9 rounded-xl bg-secondary flex items-center justify-center">
+                <Mail className="w-4 h-4 text-foreground/70" />
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={copyUserId}
-              >
-                {copiedUserId ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-              </Button>
-            </div>
-
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-secondary/50">
-              <Mail className="w-5 h-5 text-primary" />
               <div>
                 <p className="text-xs text-muted-foreground">Email</p>
                 <p className="text-sm">{user.email}</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-secondary/50">
-              <Calendar className="w-5 h-5 text-primary" />
+            <div className="flex items-center gap-3 py-3">
+              <div className="w-9 h-9 rounded-xl bg-secondary flex items-center justify-center">
+                <Calendar className="w-4 h-4 text-foreground/70" />
+              </div>
               <div>
                 <p className="text-xs text-muted-foreground">Member Since</p>
-                <p className="text-sm">{new Date(user.created_at).toLocaleDateString()}</p>
+                <p className="text-sm">{new Date(user.created_at).toLocaleDateString('en-US', { 
+                  month: 'long', 
+                  day: 'numeric',
+                  year: 'numeric'
+                })}</p>
               </div>
             </div>
           </div>
@@ -151,9 +171,10 @@ const Profile = () => {
 
         {/* Sign Out */}
         <Button 
-          variant="destructive" 
-          className="w-full"
+          variant="outline" 
+          className="w-full h-12 rounded-2xl text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/20 animate-fade-in"
           onClick={handleSignOut}
+          style={{ animationDelay: '150ms' }}
         >
           <LogOut className="w-4 h-4 mr-2" />
           Sign Out
