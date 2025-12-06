@@ -5,9 +5,9 @@ import BottomNav from "@/components/BottomNav";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
-import { Bot, Shield, Bell, Sparkles, Lock } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { Bot, Shield, Bell, Moon, ChevronRight, Lock, Sparkles, Eye, Globe, FileText, Zap } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -15,6 +15,9 @@ const Settings = () => {
   const [candyAiEnabled, setCandyAiEnabled] = useState(() => {
     const saved = localStorage.getItem("candyAiEnabled");
     return saved !== null ? JSON.parse(saved) : true;
+  });
+  const [darkMode, setDarkMode] = useState(() => {
+    return document.documentElement.classList.contains('dark');
   });
 
   useEffect(() => {
@@ -27,194 +30,164 @@ const Settings = () => {
     setCandyAiEnabled(checked);
     localStorage.setItem("candyAiEnabled", JSON.stringify(checked));
     toast({
-      title: checked ? "Candy AI Enabled" : "Candy AI Disabled",
-      description: checked ? "AI assistant is now visible" : "AI assistant is now hidden",
+      title: checked ? "Candy AI enabled" : "Candy AI disabled",
+    });
+  };
+
+  const handleDarkModeToggle = (checked: boolean) => {
+    setDarkMode(checked);
+    document.documentElement.classList.toggle('dark', checked);
+    localStorage.setItem('theme', checked ? 'dark' : 'light');
+    toast({
+      title: checked ? "Dark mode enabled" : "Light mode enabled",
     });
   };
 
   if (loading || !user) {
-    return <div className="min-h-screen gradient-animated flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-    </div>;
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
   }
 
+  const SettingItem = ({ 
+    icon: Icon, 
+    label, 
+    description, 
+    checked, 
+    onCheckedChange,
+    className
+  }: { 
+    icon: any; 
+    label: string; 
+    description?: string; 
+    checked?: boolean; 
+    onCheckedChange?: (checked: boolean) => void;
+    className?: string;
+  }) => (
+    <div className={cn("flex items-center justify-between py-3", className)}>
+      <div className="flex items-center gap-3">
+        <div className="w-9 h-9 rounded-xl bg-secondary flex items-center justify-center">
+          <Icon className="w-4 h-4 text-foreground/70" />
+        </div>
+        <div>
+          <Label className="text-[15px] font-medium cursor-pointer">{label}</Label>
+          {description && (
+            <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
+          )}
+        </div>
+      </div>
+      {onCheckedChange && (
+        <Switch checked={checked} onCheckedChange={onCheckedChange} />
+      )}
+    </div>
+  );
+
+  const SettingSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
+    <div className="card-modern p-4 animate-fade-in">
+      <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-1">{title}</h3>
+      <div className="divide-y divide-border/50">
+        {children}
+      </div>
+    </div>
+  );
+
   return (
-    <div className="min-h-screen gradient-animated pb-20 pt-20">
+    <div className="min-h-screen bg-gradient-soft pb-24 pt-20">
       <TopBar title="Settings" />
       
-      <div className="max-w-screen-xl mx-auto px-4 py-6 space-y-6">
-        {/* AI Guardian & Candy AI */}
-        <div className="glass rounded-3xl p-6 space-y-4">
-          <div className="flex items-center gap-3 mb-4">
-            <Bot className="w-6 h-6 text-primary elegant-glow-sm" />
-            <div>
-              <h3 className="font-semibold text-lg">AI Guardian & Candy AI</h3>
-              <p className="text-sm text-muted-foreground">Intelligent message analysis & assistance</p>
-            </div>
-          </div>
+      <div className="max-w-screen-xl mx-auto px-5 py-4 space-y-4">
+        {/* Appearance */}
+        <SettingSection title="Appearance">
+          <SettingItem
+            icon={Moon}
+            label="Dark Mode"
+            description="Switch to dark theme"
+            checked={darkMode}
+            onCheckedChange={handleDarkModeToggle}
+          />
+        </SettingSection>
 
-          <Separator className="bg-border/50" />
+        {/* AI Features */}
+        <SettingSection title="AI Features">
+          <SettingItem
+            icon={Bot}
+            label="Candy AI Assistant"
+            description="Show AI assistant in chats"
+            checked={candyAiEnabled}
+            onCheckedChange={handleCandyAiToggle}
+          />
+          <SettingItem
+            icon={Zap}
+            label="Spam Detection"
+            description="Automatically flag suspicious messages"
+            checked={true}
+            onCheckedChange={() => {}}
+          />
+          <SettingItem
+            icon={Eye}
+            label="Toxic Content Filter"
+            description="Filter harmful language"
+            checked={true}
+            onCheckedChange={() => {}}
+          />
+          <SettingItem
+            icon={Globe}
+            label="Auto Translate"
+            description="Real-time message translation"
+            checked={false}
+            onCheckedChange={() => {}}
+          />
+          <SettingItem
+            icon={FileText}
+            label="Auto Summarize"
+            description="Condense lengthy conversations"
+            checked={false}
+            onCheckedChange={() => {}}
+          />
+        </SettingSection>
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-3 rounded-xl hover:bg-primary/5 transition-colors">
-              <div className="space-y-1">
-                <Label htmlFor="spam-detection" className="text-base">🎣 Spam Detection</Label>
-                <p className="text-xs text-muted-foreground">Automatically flag suspicious messages</p>
-              </div>
-              <Switch id="spam-detection" defaultChecked />
-            </div>
-
-            <div className="flex items-center justify-between p-3 rounded-xl hover:bg-primary/5 transition-colors">
-              <div className="space-y-1">
-                <Label htmlFor="toxic-filter" className="text-base">😤 Toxic Content Filter</Label>
-                <p className="text-xs text-muted-foreground">Filter harmful language and harassment</p>
-              </div>
-              <Switch id="toxic-filter" defaultChecked />
-            </div>
-
-            <div className="flex items-center justify-between p-3 rounded-xl hover:bg-primary/5 transition-colors">
-              <div className="space-y-1">
-                <Label htmlFor="auto-translate" className="text-base">🌍 Auto Translate</Label>
-                <p className="text-xs text-muted-foreground">Real-time message translation across languages</p>
-              </div>
-              <Switch id="auto-translate" />
-            </div>
-
-            <div className="flex items-center justify-between p-3 rounded-xl hover:bg-primary/5 transition-colors">
-              <div className="space-y-1">
-                <Label htmlFor="auto-summarize" className="text-base">📝 Auto Summarize</Label>
-                <p className="text-xs text-muted-foreground">Condense lengthy conversations and documents</p>
-              </div>
-              <Switch id="auto-summarize" />
-            </div>
-
-            <div className="flex items-center justify-between p-3 rounded-xl hover:bg-primary/5 transition-colors">
-              <div className="space-y-1">
-                <Label htmlFor="tone-analysis" className="text-base">😊 Tone Analysis</Label>
-                <p className="text-xs text-muted-foreground">Analyze message sentiment with emoji labels</p>
-              </div>
-              <Switch id="tone-analysis" />
-            </div>
-
-            <div className="flex items-center justify-between p-3 rounded-xl hover:bg-primary/5 transition-colors">
-              <div className="space-y-1">
-                <Label htmlFor="malware-detection" className="text-base">🦠 Malware Detection</Label>
-                <p className="text-xs text-muted-foreground">Scan links and attachments for threats</p>
-              </div>
-              <Switch id="malware-detection" defaultChecked />
-            </div>
-
-            <Separator className="bg-border/50" />
-
-            <div className="flex items-center justify-between p-3 rounded-xl hover:bg-primary/5 transition-colors">
-              <div className="space-y-1">
-                <Label htmlFor="candy-ai-enabled" className="text-base">🍬 Show Candy AI</Label>
-                <p className="text-xs text-muted-foreground">Toggle visibility of AI assistant in chats</p>
-              </div>
-              <Switch 
-                id="candy-ai-enabled" 
-                checked={candyAiEnabled}
-                onCheckedChange={handleCandyAiToggle}
-              />
-            </div>
-          </div>
-
-          <div className="p-4 rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/30 mt-4">
-            <div className="flex items-start gap-3">
-              <Sparkles className="w-5 h-5 text-primary mt-0.5 elegant-glow-sm" />
-              <div className="space-y-1">
-                <p className="text-sm font-semibold">AI-Powered Protection</p>
-                <p className="text-xs text-muted-foreground">
-                  Our AI keeps conversations clean, safe, and smart. All analysis happens securely without compromising your privacy.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Privacy & Security */}
-        <div className="glass rounded-3xl p-6 space-y-4">
-          <div className="flex items-center gap-3 mb-4">
-            <Shield className="w-6 h-6 text-primary elegant-glow-sm" />
-            <div>
-              <h3 className="font-semibold text-lg">Privacy & Security</h3>
-              <p className="text-sm text-muted-foreground">Your security settings</p>
-            </div>
-          </div>
-
-          <Separator className="bg-border/50" />
-
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <Label htmlFor="screenshot-protection">Screenshot Protection</Label>
-                <p className="text-xs text-muted-foreground">Prevent unauthorized screenshots</p>
-              </div>
-              <Switch id="screenshot-protection" defaultChecked />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <Label htmlFor="stealth-mode">Stealth & Offline Mode</Label>
-                <p className="text-xs text-muted-foreground">P2P encrypted tunnels, local storage when offline</p>
-              </div>
-              <Switch id="stealth-mode" defaultChecked />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <Label htmlFor="quantum-lock">Quantum File Lock</Label>
-                <p className="text-xs text-muted-foreground">QRNG-encrypted attachments with one-time keys</p>
-              </div>
-              <Switch id="quantum-lock" defaultChecked />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <Label htmlFor="encryption">QRNG Encryption</Label>
-                <p className="text-xs text-muted-foreground">Always active • Adaptive key refresh</p>
-              </div>
-              <Lock className="w-5 h-5 text-primary" />
-            </div>
-          </div>
-
-          <div className="p-4 rounded-xl bg-primary/10 border border-primary/30 mt-4">
-            <h4 className="font-semibold mb-2 flex items-center gap-2">
-              <Sparkles className="w-4 h-4" />
-              Security Core
-            </h4>
-            <ul className="text-xs space-y-1 text-muted-foreground">
-              <li>✓ Quantum-secured encryption (QRNG keys)</li>
-              <li>✓ Zero metadata storage (no IPs, timestamps, device info)</li>
-              <li>✓ Peer-to-peer architecture with stealth mode</li>
-              <li>✓ Adaptive encryption with automatic key rotation</li>
-              <li>✓ Offline sync support for true privacy</li>
-              <li>✓ Screenshot & screen recording protection</li>
-            </ul>
-          </div>
-        </div>
+        {/* Security */}
+        <SettingSection title="Privacy & Security">
+          <SettingItem
+            icon={Shield}
+            label="Screenshot Protection"
+            description="Prevent unauthorized screenshots"
+            checked={true}
+            onCheckedChange={() => {}}
+          />
+          <SettingItem
+            icon={Lock}
+            label="QRNG Encryption"
+            description="Quantum-secured encryption"
+            checked={true}
+            onCheckedChange={() => {}}
+          />
+        </SettingSection>
 
         {/* Notifications */}
-        <div className="glass rounded-3xl p-6 space-y-4">
-          <div className="flex items-center gap-3">
-            <Bell className="w-6 h-6 text-primary elegant-glow-sm" />
+        <SettingSection title="Notifications">
+          <SettingItem
+            icon={Bell}
+            label="Push Notifications"
+            description="Get notified of new messages"
+            checked={true}
+            onCheckedChange={() => {}}
+          />
+        </SettingSection>
+
+        {/* Info Card */}
+        <div className="card-modern p-4 bg-primary/5 border-primary/20">
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-primary" />
+            </div>
             <div>
-              <h3 className="font-semibold text-lg">Notifications</h3>
-              <p className="text-sm text-muted-foreground">Manage your alerts</p>
-            </div>
-          </div>
-
-          <Separator className="bg-border/50" />
-
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="push-notifications">Push Notifications</Label>
-              <Switch id="push-notifications" defaultChecked />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <Label htmlFor="session-alerts">Session Alerts</Label>
-              <Switch id="session-alerts" defaultChecked />
+              <p className="text-sm font-medium">AI-Powered Protection</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                All analysis happens securely without compromising your privacy.
+              </p>
             </div>
           </div>
         </div>
